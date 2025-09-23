@@ -28,7 +28,7 @@ jobs:
     - name: Build
       run: |
         cd cmd/webproxy/
-        GOOS=${{ matrix.goos }} GOARCH=${{ matrix.goarch }} go build -o ../..webproxy-${{ matrix.goos }}-${{ matrix.goarch }}
+        GOOS=${{ matrix.goos }} GOARCH=${{ matrix.goarch }} go build -o ../../webproxy-${{ matrix.goos }}-${{ matrix.goarch }}
 
     - name: Test
       run: go test -v ./...
