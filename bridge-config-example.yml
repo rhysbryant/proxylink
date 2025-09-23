@@ -1,0 +1,11 @@
+rules:
+  - target:
+      - some-website-only-accessable-from-country-y.com
+    proxy:
+      url: wss://my-exit-node-in-country-y.com
+      key: key
+  - target:
+      - bad-site.com
+    block: true
+    #direct is default if no exit node is specified
+  - block: false

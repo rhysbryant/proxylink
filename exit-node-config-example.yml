@@ -1,0 +1,12 @@
+mode: exit
+listen: :443
+key: key #shared secret with clients needs to be 64 hex chars suggest using two UUIDS joined together
+tls:
+  # cert: /path/to/cert.pem
+  # key: /path/to/key.pem
+  # or
+  # you can use letsencrypt to get a free cert
+  # note by enabling letsencrypt you are accepting the letsencrypt TOS
+  # letsencrypt: true # will use acme to get a cert for the domain you are using
+  # domain: my-exit-node-in-country-y.com # domain must point to this server
+
