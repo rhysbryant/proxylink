@@ -41,8 +41,9 @@ func ByoDirectionalCopy(dst io.ReadWriteCloser, src io.ReadWriteCloser) error {
 		if !firstClose.Load() && err != nil && err != io.EOF {
 			errForReturn = err
 		}
-		dst.Close()
+
 		firstClose.Store(true)
+		dst.Close()
 		wait.Done()
 	}()
 
@@ -52,8 +53,9 @@ func ByoDirectionalCopy(dst io.ReadWriteCloser, src io.ReadWriteCloser) error {
 		if !firstClose.Load() && err != nil && err != io.EOF {
 			errForReturn = err
 		}
-		src.Close()
+
 		firstClose.Store(true)
+		src.Close()
 		wait.Done()
 	}()
 

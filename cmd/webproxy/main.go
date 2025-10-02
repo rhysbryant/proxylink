@@ -22,7 +22,9 @@ import (
 	"flag"
 	"fmt"
 	"log"
+	"log/slog"
 	"net/http"
+	"os"
 
 	"github.com/kardianos/service"
 	"github.com/rhysbryant/proxylink/pkg/bridgeserver"
@@ -77,6 +79,12 @@ func (p *program) Stop(s service.Service) error {
 	return nil
 }
 
+func setIfEmpty(value *string, otherValue string) {
+	if otherValue != "" {
+		*value = otherValue
+	}
+}
+
 func main() {
 	// Define CLI flags
 	var mode string
@@ -90,6 +98,7 @@ func main() {
 	var useLetsEncrypt bool
 	var domain string
 	var serviceFlag string
+	var logFormat string
 
 	flag.StringVar(&mode, "mode", "standalone", "Mode of operation: standalone, bridge, or exit")
 	flag.StringVar(&nextProxyAddr, "next", "", "Address of the next proxy (required in bridge mode)")
@@ -99,6 +108,7 @@ func main() {
 	flag.StringVar(&keyFile, "tls-key", "", "Path to TLS key file")
 	flag.StringVar(&wsKey, "ws-key", "", "32-byte key for encrypting WebSocket traffic (optional)")
 	flag.StringVar(&logLevel, "log-level", "error", "Logging level: debug, info, warn, error")
+	flag.StringVar(&logFormat, "log-format", "text", "Log format: text or json")
 	flag.StringVar(&configFileName, "config", "config.yml", "Path to configuration file")
 	flag.BoolVar(&useLetsEncrypt, "lets-encrypt", false, "Enable Let's Encrypt support")
 	flag.StringVar(&domain, "domain", "", "Domain name for Let's Encrypt (required if --lets-encrypt is enabled)")
@@ -108,14 +118,39 @@ func main() {
 	// Load configuration
 	cfg, err := config.LoadConfig(configFileName)
 	if err != nil {
-		log.Println("failed to load config:", err)
+		slog.Error("failed to load config:", err)
 		cfg = &config.Config{}
-		cfg.ListenAddr = listenAddr
-		cfg.Mode = mode
-		cfg.TLS.CertFile = certFile
-		cfg.TLS.KeyFile = keyFile
-		cfg.TLS.LetsEncrypt = useLetsEncrypt
-		cfg.TLS.Domain = domain
+	}
+
+	setIfEmpty(&cfg.ListenAddr, listenAddr)
+	setIfEmpty(&cfg.Mode, mode)
+	setIfEmpty(&cfg.TLS.CertFile, certFile)
+	setIfEmpty(&cfg.TLS.KeyFile, keyFile)
+	cfg.TLS.LetsEncrypt = useLetsEncrypt
+	setIfEmpty(&cfg.TLS.Domain, domain)
+
+	// Configure logging
+	var handler slog.Handler
+	switch logFormat {
+	case "json":
+		handler = slog.NewJSONHandler(os.Stdout, nil)
+	default:
+		handler = slog.NewTextHandler(os.Stdout, nil)
+	}
+	slog.SetDefault(slog.New(handler))
+
+	// Set log level
+	switch logLevel {
+	case "debug":
+		slog.SetLogLoggerLevel(slog.LevelDebug)
+	case "info":
+		slog.SetLogLoggerLevel(slog.LevelInfo)
+	case "warn":
+		slog.SetLogLoggerLevel(slog.LevelWarn)
+	case "error":
+		slog.SetLogLoggerLevel(slog.LevelError)
+	default:
+		log.Fatalf("Invalid log level: %s", logLevel)
 	}
 
 	if wsKey == "" {
@@ -176,6 +211,7 @@ func main() {
 	server := &http.Server{
 		Addr: cfg.ListenAddr,
 		Handler: http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+
 			rp.ProcessRequest(r, w)
 		}),
 	}

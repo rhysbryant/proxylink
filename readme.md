@@ -1,9 +1,9 @@
 # proxyLink
 
-Simple forward web proxy that supports tunnelling user traffic between the bridge and exit node,
-encrypts and encapulates traffic within web socket frames.
+Simple forward web proxy that additionally supports tunnelling user traffic between the bridge and exit node,
+encrypts and encapsulates traffic within web socket frames.
 
-The bridge to exit node connection can optionally also use TLS with Let's Encrypt integration for automatic certificate generation.
+The connection between the bridge and the exit node can optionally use TLS. Let's Encrypt integration allows for automatic certificate generation.
 
 ## Modes of Operation
 
@@ -39,6 +39,7 @@ Bridge proxy is configured as a proxy for the web browser
 - **Encryption**: Optional WebSocket traffic encryption using a 32-byte key.
 - **TLS Support**: Custom certificates or automatic Let's Encrypt integration.
 - **Configurable**: Command-line flags for easy setup.
+- **Logging**: Supports configurable log levels and formats (text or JSON).
 
 ## Usage
 
@@ -54,14 +55,16 @@ Bridge proxy is configured as a proxy for the web browser
 | `--ws-key`       | 32-byte key (in hex) for encrypting traffic.*    |
 | `--lets-encrypt` | Enable Let's Encrypt support.                    |
 | `--domain`       | Domain name for Let's Encrypt (required if enabled). |
+| `--log-level`    | Logging level: `debug`, `info`, `warn`, `error`. |
+| `--log-format`   | Log format: `text` (default) or `json`.          |
 
-\* traffic from public addreses is blocked if no key is provided
+\* traffic from public addresses is blocked if no key is provided
 
 ### Example Commands
 
 #### Standalone Mode
 ```bash
-webproxy --mode standalone --listen :8080
+webproxy --mode standalone --listen :8080 --log-level info --log-format json
 ```
 
 #### Bridge Mode
