@@ -17,7 +17,7 @@ package rulesengine
  along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
 import (
-	"fmt"
+	"errors"
 	"net/http"
 
 	"github.com/rhysbryant/proxylink/pkg/httputils"
@@ -42,10 +42,10 @@ func (rw *RequestWrapper) AddProxyProvider(name string, provider httputils.Reque
 func (rw *RequestWrapper) ProcessRequest(r *http.Request, w http.ResponseWriter) error {
 
 	result := rw.rulesEngine.FindMatch(r.URL, r.RemoteAddr)
-	fmt.Println("Matched rule:", result)
+
 	if result.Block {
 		http.Error(w, "Forbidden", http.StatusForbidden)
-		return nil
+		return errors.New("request blocked by rules engine")
 	} else {
 		//default to direct if no exit node specified
 		var providerName = DefaultProviderName
