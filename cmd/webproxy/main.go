@@ -118,7 +118,7 @@ func main() {
 	// Load configuration
 	cfg, err := config.LoadConfig(configFileName)
 	if err != nil {
-		slog.Error("failed to load config:", err)
+		slog.Error("failed to load config:", "error", err)
 		cfg = &config.Config{}
 	}
 
